@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react'
-import { Button, Container, Table } from 'react-bootstrap'
+import { Container, Table } from 'react-bootstrap'
 import { IUsers } from '../types/IUsers'
+import NewUserModal from './Modal'
+
 
 export const Form = () => {
     const [users, setUsers] = React.useState<IUsers[]>([])
@@ -22,7 +24,7 @@ export const Form = () => {
     return (
         <>
             <Container>
-                <Button className='btn-success float-right mb-2 mt-2'>New User</Button>
+                <NewUserModal />
                 <Table striped bordered hover variant="dark" className='mt-5'>
                     <thead>
                         <tr>
@@ -43,6 +45,7 @@ export const Form = () => {
                         </tbody>
                     ))}
                 </Table>
+
             </Container>
         </>
     )
