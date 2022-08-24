@@ -1,32 +1,52 @@
 import { useState } from 'react';
+import { Alert } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
-type IBool = boolean;
+export type IBool = boolean;
 const NewUserModal = () => {
     const [show, setShow] = useState<IBool>(false);
+    const [formProperties, setFormProperties] = useState({
+        firstName: '',
+        lastName: '',
+        email: ''
+    });
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    const PostUser = async (e: any) => {
+    const handleInput = (fieldName: any, value: any) => {
+        setFormProperties({
+            ...formProperties,
+            [fieldName]: value,
+        });
+    };
+
+    const PostUser = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-        const firstName = e.target.elements.firstName.value;
-        const lastName = e.target.elements.lastName.value;
-        const email = e.target.elements.email.value;
-        const data = { firstName, lastName, email };
         try {
             const response = await fetch('https://devkom.herokuapp.com/users', {
                 method: 'POST',
+                body: JSON.stringify(formProperties),
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+
             });
-            const result = await response.json();
-            console.log(result);
+            if (response.status === 200) {
+                await response.json();
+                setFormProperties({
+                    firstName: '',
+                    lastName: '',
+                    email: ''
+                })
+                handleClose();
+                window.location.reload()
+            } else if (response.status === 400) {
+                alert("Please fill all the fields")
+            }
         } catch (error) {
-            console.log(error);
+            alert(error);
         }
     }
 
@@ -44,24 +64,31 @@ const NewUserModal = () => {
                     <Modal.Title>Adding new User</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+
                     <Form>
                         <Form.Group
                             className="mb-3"
                             controlId="exampleForm.ControlInput1"
                         >
+                            <Form.Label>First Name</Form.Label>
                             <Form.Control
                                 type="firstName"
                                 placeholder="insert firstName"
+                                value={formProperties.firstName}
+                                onChange={(e) => handleInput("firstName", e.target.value)}
                                 autoFocus
                             />
                         </Form.Group>
+                        <Form.Label>Last Name</Form.Label>
                         <Form.Group
                             className="mb-3"
                             controlId="exampleForm.ControlInput1"
                         >
                             <Form.Control
                                 type="surName"
-                                placeholder="insert surname"
+                                value={formProperties.lastName}
+                                onChange={(e) => handleInput("lastName", e.target.value)}
+                                placeholder="insert lastName"
                                 autoFocus
                             />
                         </Form.Group>
@@ -69,17 +96,20 @@ const NewUserModal = () => {
                             <Form.Label>Email address</Form.Label>
                             <Form.Control
                                 type="email"
+                                value={formProperties.email}
+                                onChange={(e) => handleInput("email", e.target.value)}
                                 placeholder="name@example.com"
                                 autoFocus
                             />
                         </Form.Group>
-
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
+                    <Button type='button' variant="primary"
+                        onClick={PostUser}
+                    >
 
-                    <Button variant="primary" onClick={handleClose}>
-                        Save Changes
+                        Create User
                     </Button>
                 </Modal.Footer>
             </Modal>
